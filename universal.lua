@@ -1,5 +1,5 @@
 -- versão corrigida do seu script
-local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/main.lua"))()
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 WindUI:SetFont("rbxassetid://12187365559")
 WindUI:SetTheme("Dark")
