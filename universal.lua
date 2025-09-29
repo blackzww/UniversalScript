@@ -1,103 +1,158 @@
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
 
--- Fonte customizada e tema escuro
+-- Config inicial
 WindUI:SetFont("rbxassetid://12187370747")
 WindUI:SetTheme("Dark")
 
--- Criação da janela principal
 local Window = WindUI:CreateWindow({
     Title = "Blackzw Universal",
-    Icon = "app-window",
+    Icon = "zap",
     Author = "by blackzw",
     Folder = "BlackzwHub",
-    CornerRadius = UDim.new(0, 20), -- bordas arredondadas
-    TopbarColor = Color3.fromRGB(35, 35, 35), -- cor do topo
-    TitleColor = Color3.fromRGB(252, 0, 0), -- cor do título (destacado)
+    Size = UDim2.fromOffset(600, 500),
+    CornerRadius = UDim.new(0, 15),
+    TopbarColor = Color3.fromRGB(15, 15, 15),
+    TitleColor = Color3.fromRGB(220, 20, 60),
 })
 
--- Botão de abrir com gradiente e animação
+-- Botão de abrir
 Window:EditOpenButton({
-    Title = "Open Blackzw UI",
-    Icon = "monitor",
-    CornerRadius = UDim.new(0,16),
-    StrokeThickness = 2,
+    Title = "Abrir Hub",
+    Icon = "menu",
+    CornerRadius = UDim.new(0, 12),
+    StrokeThickness = 1,
     Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromHex("FC0000")),
-        ColorSequenceKeypoint.new(0.5, Color3.fromHex("B90000")),
-        ColorSequenceKeypoint.new(1, Color3.fromHex("7A0000"))
+        ColorSequenceKeypoint.new(0, Color3.fromHex("#DC143C")),
+        ColorSequenceKeypoint.new(1, Color3.fromHex("#8B0000"))
     },
-    OnlyMobile = false, -- disponível para PC e mobile
+    OnlyMobile = false,
     Enabled = true,
     Draggable = true,
-    Animation = "Bounce", -- animação para destacar o botão
 })
 
--- Desabilita botões problemáticos do topo
-Window:DisableTopbarButtons({
-    "Fullscreen", -- desabilita fullscreen
-    "Resize", -- desabilita redimensionar
+-- Desabilita botões do topo
+Window:DisableTopbarButtons({ "Fullscreen" })
+
+-- Tabs
+local Tab1 = Window:Tab({ Title = "Aimbot", Icon = "crosshair" })
+local Tab2 = Window:Tab({ Title = "AutoKill", Icon = "sword" })
+local Tab3 = Window:Tab({ Title = "Fly", Icon = "bird" })
+local Tab4 = Window:Tab({ Title = "Speed", Icon = "gauge" })
+local Tab5 = Window:Tab({ Title = "ESP", Icon = "eye" })
+local Tab6 = Window:Tab({ Title = "Settings", Icon = "settings" })
+
+-- TAB 1: AIMBOT
+Tab1:Button({
+    Title = "Ativar Aimbot",
+    Desc = "Ativa o aimbot manualmente",
+    Callback = function()
+        loadstring(game:HttpGet("-- COLOCAR URL DO AIMBOT AQUI"))()
+    end
 })
 
--- Ativa o ícone da janela (se aplicável)
-if Window.Icon and Window.Icon.Enable then
-    Window.Icon:Enable()
-end
-
--- Tab 1: Aimbot (original)
-local Tab1 = Window:Tab({
-    Title = "Aimbot",
-    Icon = "crosshair",
-    Locked = false,
-    TabColor = Color3.fromRGB(252, 0, 0),
+Tab1:Toggle({
+    Title = "Aimbot Automático",
+    Desc = "Ativa o aimbot automaticamente",
+    Default = false,
+    Callback = function(state) 
+        print("Aimbot:", state)
+    end
 })
 
--- Tab 2: Template 1
-local Tab2 = Window:Tab({
-    Title = "Template 1",
-    Icon = "crosshair",
-    Locked = false,
-    TabColor = Color3.fromRGB(252, 0, 0),
+-- TAB 2: AUTOKILL
+Tab2:Button({
+    Title = "Ativar AutoKill",
+    Desc = "Executa o AutoKill uma vez",
+    Callback = function()
+        loadstring(game:HttpGet("-- COLOCAR URL DO AUTOKILL AQUI"))()
+    end
 })
 
--- Tab 3: Template 2
-local Tab3 = Window:Tab({
-    Title = "Template 2",
-    Icon = "crosshair",
-    Locked = false,
-    TabColor = Color3.fromRGB(252, 0, 0),
+Tab2:Toggle({
+    Title = "AutoKill Contínuo", 
+    Desc = "Mantém o AutoKill sempre ativo",
+    Default = false,
+    Callback = function(state) 
+        print("AutoKill:", state)
+    end
 })
 
--- Tab 4: Template 3
-local Tab4 = Window:Tab({
-    Title = "Template 3",
-    Icon = "crosshair",
-    Locked = false,
-    TabColor = Color3.fromRGB(252, 0, 0),
+-- TAB 3: FLY
+Tab3:Button({
+    Title = "Ativar Fly",
+    Desc = "Ativa voo manualmente",
+    Callback = function()
+        loadstring(game:HttpGet("-- COLOCAR URL DO FLY AQUI"))()
+    end
 })
 
--- Tab 5: Template 4
-local Tab5 = Window:Tab({
-    Title = "Template 4",
-    Icon = "crosshair",
-    Locked = false,
-    TabColor = Color3.fromRGB(252, 0, 0),
+Tab3:Toggle({
+    Title = "Fly Automático",
+    Desc = "Mantém o voo ativo",
+    Default = false,
+    Callback = function(state) 
+        print("Fly:", state)
+    end
 })
 
--- Tab 6: Template 5
-local Tab6 = Window:Tab({
-    Title = "Template 5",
-    Icon = "crosshair",
-    Locked = false,
-    TabColor = Color3.fromRGB(252, 0, 0),
+-- TAB 4: SPEED
+Tab4:Button({
+    Title = "Ativar Speed",
+    Desc = "Aumenta a velocidade manualmente", 
+    Callback = function()
+        loadstring(game:HttpGet("-- COLOCAR URL DO SPEED AQUI"))()
+    end
 })
 
--- Notificação animada
+Tab4:Toggle({
+    Title = "Speed Boost",
+    Desc = "Mantém velocidade aumentada",
+    Default = false,
+    Callback = function(state) 
+        print("Speed:", state)
+    end
+})
+
+-- TAB 5: ESP
+Tab5:Button({
+    Title = "Ativar ESP",
+    Desc = "Mostra jogadores através das paredes",
+    Callback = function()
+        loadstring(game:HttpGet("-- COLOCAR URL DO ESP AQUI"))()
+    end
+})
+
+Tab5:Toggle({
+    Title = "ESP Contínuo",
+    Desc = "Mantém ESP ativo sempre",
+    Default = false,
+    Callback = function(state) 
+        print("ESP:", state)
+    end
+})
+
+-- TAB 6: SETTINGS  
+Tab6:Button({
+    Title = "Salvar Config",
+    Desc = "Salva as configurações atuais",
+    Callback = function()
+        print("Config salva")
+    end
+})
+
+Tab6:Toggle({
+    Title = "Modo Escuro",
+    Desc = "Ativa/desativa tema escuro",
+    Default = true,
+    Callback = function(state) 
+        print("Dark Mode:", state)
+    end
+})
+
+-- Notificação
 WindUI:Notify({
-    Title = "Thanks for using my script :3",
-    Content = "I really appreciate that you used my script, thanks :3",
-    Duration = 4,
-    Icon = "thumbs-up",
-    Animation = "Fade", -- animação suave
-    BackgroundColor = Color3.fromRGB(35, 35, 35), -- cor do fundo
-    TitleColor = Color3.fromRGB(252, 0, 0), -- cor do título
+    Title = "Hub Carregado",
+    Content = "Blackzw Universal pronto para uso.",
+    Duration = 3,
+    Icon = "check",
 })
