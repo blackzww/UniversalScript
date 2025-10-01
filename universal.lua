@@ -5,7 +5,7 @@ WindUI:SetFont("rbxassetid://12187370747")
 WindUI:SetTheme("Dark")
 
 local Window = WindUI:CreateWindow({
-    Title = "Blackzw Universal",
+    Title = "Blackzw | Universal",
     Icon = "zap",
     Author = "by blackzw",
     Folder = "BlackzwHub",
@@ -17,15 +17,15 @@ local Window = WindUI:CreateWindow({
 
 -- Botão de abrir
 Window:EditOpenButton({
-    Title = "Abrir Hub",
-    Icon = "menu",
+    Title = "Open Universal UI",
+    Icon = "monitor",
     CornerRadius = UDim.new(0, 12),
     StrokeThickness = 1,
     Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0, Color3.fromHex("#DC143C")),
         ColorSequenceKeypoint.new(1, Color3.fromHex("#8B0000"))
     },
-    OnlyMobile = false,
+    OnlyMobile = true,
     Enabled = true,
     Draggable = true,
 })
@@ -36,9 +36,9 @@ Window:DisableTopbarButtons({ "Fullscreen" })
 -- Tabs
 local Tab1 = Window:Tab({ Title = "Aimbot", Icon = "crosshair" })
 local Tab2 = Window:Tab({ Title = "AutoKill", Icon = "sword" })
-local Tab3 = Window:Tab({ Title = "Fly", Icon = "bird" })
-local Tab4 = Window:Tab({ Title = "Speed", Icon = "gauge" })
-local Tab5 = Window:Tab({ Title = "ESP", Icon = "eye" })
+local Tab3 = Window:Tab({ Title = "AutoNaoSei", Icon = "bird" })
+local Tab4 = Window:Tab({ Title = "AindaNaoSe", Icon = "gauge" })
+local Tab5 = Window:Tab({ Title = "Misc", Icon = "layers" })
 local Tab6 = Window:Tab({ Title = "Settings", Icon = "settings" })
 
 -- CARREGA O AIMBOT UMA VEZ
@@ -434,21 +434,29 @@ Tab4:Slider({
     end
 })
 
--- TAB 5: ESP
-Tab5:Toggle({
-    Title = "ESP Players",
-    Desc = "Mostra todos os jogadores no mapa",
-    Default = false,
-    Callback = function(state)
+-- TAB 5: SPEED
+Tab5:Slider({
+    Title = "Velocidade",
+    Desc = "Controla a velocidade do personagem",
+    Default = 16,
+    Min = 16,
+    Max = 300,
+    Callback = function(value)
+        -- muda a velocidade
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+            player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+        end
+
+        -- notificação
         WindUI:Notify({
-            Title = "ESP",
-            Content = state and "ESP Ativado" or "ESP Desativado",
+            Title = "Speed",
+            Content = "Velocidade: " .. value,
             Duration = 2,
-            Icon = "eye",
+            Icon = "gauge",
         })
     end
 })
-
 -- TAB 6: SETTINGS
 Tab6:Button({
     Title = "Destruir Interface",
@@ -467,7 +475,7 @@ Tab6:Button({
 -- Notificação
 WindUI:Notify({
     Title = "Hub Carregado",
-    Content = "Blackzw Universal pronto para uso.",
+    Content = "Blackzw Universal pronto para uso, espero que não seja banido ;-;.",
     Duration = 3,
     Icon = "check",
 })
