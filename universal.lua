@@ -433,30 +433,47 @@ Tab4:Slider({
         })
     end
 })
-
--- TAB 5: SPEED
-Tab5:Slider({
-    Title = "Velocidade",
-    Desc = "Controla a velocidade do personagem",
-    Default = 16,
-    Min = 16,
-    Max = 300,
-    Callback = function(value)
-        -- muda a velocidade
+-- TAB 5 SPEED
+Tab5:Button({
+    Title = "Velocidade +",
+    Desc = "Aumenta velocidade",
+    Callback = function()
         local player = game.Players.LocalPlayer
         if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
-            player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+            local currentSpeed = player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed
+            local newSpeed = math.min(currentSpeed + 10, 300)
+            player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = newSpeed
+            
+            WindUI:Notify({
+                Title = "Speed",
+                Content = "Velocidade: " .. newSpeed,
+                Duration = 2,
+                Icon = "gauge",
+            })
         end
-
-        -- notificação
-        WindUI:Notify({
-            Title = "Speed",
-            Content = "Velocidade: " .. value,
-            Duration = 2,
-            Icon = "gauge",
-        })
     end
 })
+
+Tab5:Button({
+    Title = "Velocidade -",
+    Desc = "Diminui velocidade",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+            local currentSpeed = player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed
+            local newSpeed = math.max(currentSpeed - 10, 16)
+            player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = newSpeed
+            
+            WindUI:Notify({
+                Title = "Speed",
+                Content = "Velocidade: " .. newSpeed,
+                Duration = 2,
+                Icon = "gauge",
+            })
+        end
+    end
+})
+
 -- TAB 6: SETTINGS
 Tab6:Button({
     Title = "Destruir Interface",
