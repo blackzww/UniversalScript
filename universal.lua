@@ -466,7 +466,7 @@ Tab5:Input({
             WindUI:Notify({
                 Title = "Erro",
                 Content = "Digite um número entre 16 e 1000",
-                Duration = 3,
+                Duration = 2,
                 Icon = "error",
             })
         end
