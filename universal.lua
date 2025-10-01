@@ -439,12 +439,17 @@ Tab4:Slider({
     end
 })
 
--- TAB 5: VELOCIDADE POR TEXTO
-Tab5:Textbox({
+-- TAB 5: VELOCIDADE COM INPUT
+Tab5:Input({
     Title = "Definir Velocidade",
     Desc = "Digite um valor entre 16 e 300",
-    Callback = function(text)
-        local speed = tonumber(text)
+    Value = "16",
+    InputIcon = "gauge",
+    Type = "Input",
+    Placeholder = "Ex: 50, 100, 200...",
+    Callback = function(input) 
+        local speed = tonumber(input)
+        
         if speed and speed >= 16 and speed <= 300 then
             local player = game.Players.LocalPlayer
             if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
