@@ -445,7 +445,7 @@ Tab5:Input({
     -- Altera a descrição para o novo limite
     Desc = "Digite um valor entre 16 e 1000. Recomendado usar menos de 300.", 
     Value = "16",
-    InputIcon = "gauge",
+    InputIcon = "text_cursor",
     Type = "Input", -- Mantemos o "Input", pois sabemos que funciona
     Placeholder = "Ex: 50, 100, 200...",
     Callback = function(input) 
