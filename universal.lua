@@ -439,51 +439,53 @@ Tab4:Slider({
     end
 })
 
-Tab5:Input({
+-- TAB 5 SPEED
+local MinSpeed = 16
+local MaxSpeed = 1000
+
+local SpeedInput = Tab:Input({
     Title = "Definir Velocidade",
-    Desc = "Recomendado usar menos de 300.",
-    Value = "16",
+    Desc = "Velocidade Mínima: " .. MinSpeed .. ". Máxima Recomendada: 300.",
+    Value = tostring(MinSpeed), -- Define o valor inicial como o mínimo
     InputIcon = "text_cursor",
-    Type = "Input",  -- mudou de "Input" para "Number"
+    Type = "Input", -- Garante que o campo de texto aparece
     Placeholder = "Ex: 50, 100, 200...",
     Callback = function(input) 
         local speed = tonumber(input)
 
-        if speed and speed >= 16 and speed <= 1000 then
+        -- 1. Verifica se é um número válido e está dentro do limite
+        if speed and speed >= MinSpeed and speed <= MaxSpeed then
             local player = game.Players.LocalPlayer
+            
+            -- 2. Tenta aplicar a velocidade
             if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
                 player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speed
 
+                -- 3. Notificação de sucesso
                 WindUI:Notify({
-                    Title = "Speed",
-                    Content = "Velocidade: " .. speed,
+                    Title = "Sucesso",
+                    Content = "Velocidade alterada para: " .. speed,
                     Duration = 2,
                     Icon = "text_cursor",
                 })
+            else
+                -- Notificação se não houver Humanoid (pode acontecer durante o carregamento)
+                WindUI:Notify({
+                    Title = "Erro",
+                    Content = "Não foi possível encontrar o Humanoid do jogador.",
+                    Duration = 2,
+                    Icon = "error",
+                })
             end
         else
+            -- 4. Notificação de erro de validação
             WindUI:Notify({
-                Title = "Erro",
-                Content = "Digite um número entre 16 e 1000",
-                Duration = 2,
+                Title = "Erro de Valor",
+                Content = "Digite um número entre " .. MinSpeed .. " e " .. MaxSpeed .. ".",
+                Duration = 3,
                 Icon = "error",
             })
         end
-    end
-})
-
--- TAB 6: SETTINGS
-Tab6:Button({
-    Title = "Destruir Interface",
-    Desc = "Remove completamente a interface",
-    Callback = function()
-        Window:Destroy()
-        WindUI:Notify({
-            Title = "Interface",
-            Content = "Interface destruída",
-            Duration = 2,
-            Icon = "trash",
-        })
     end
 })
 
