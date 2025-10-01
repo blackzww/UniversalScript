@@ -444,7 +444,7 @@ Tab5:Input({
     Title = "Definir Velocidade",
     Desc = "Recomendado usar menos de 300.",
     Value = "16",
-    InputIcon = "gauge",
+    InputIcon = "text_cursor",
     Type = "Input",
     Placeholder = "Ex: 50, 100, 200...",
     Callback = function(input) 
