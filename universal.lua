@@ -439,25 +439,32 @@ Tab4:Slider({
     end
 })
 
--- TAB 5: SPEED SLIDER (corrigido para mesmo formato)
-Tab5:Slider({
-    Title = "Velocidade",
-    Desc = "Controla a velocidade do personagem",
-    Default = 16,
-    Min = 16,
-    Max = 300,
-    Callback = function(value)
-        local player = game.Players.LocalPlayer
-        if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
-            player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+-- TAB 5: VELOCIDADE POR TEXTO
+Tab5:Textbox({
+    Title = "Definir Velocidade",
+    Desc = "Digite um valor entre 16 e 300",
+    Callback = function(text)
+        local speed = tonumber(text)
+        if speed and speed >= 16 and speed <= 300 then
+            local player = game.Players.LocalPlayer
+            if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+                player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speed
+                
+                WindUI:Notify({
+                    Title = "Speed",
+                    Content = "Velocidade: " .. speed,
+                    Duration = 2,
+                    Icon = "gauge",
+                })
+            end
+        else
+            WindUI:Notify({
+                Title = "Erro",
+                Content = "Digite um número entre 16 e 300",
+                Duration = 3,
+                Icon = "error",
+            })
         end
-
-        WindUI:Notify({
-            Title = "Speed",
-            Content = "Velocidade: " .. value,
-            Duration = 2,
-            Icon = "gauge",
-        })
     end
 })
 
