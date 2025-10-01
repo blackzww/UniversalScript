@@ -444,7 +444,7 @@ Tab5:Input({
     Desc = "Recomendado usar menos de 300.",
     Value = "16",
     InputIcon = "text_cursor",
-    Type = "Number",  -- mudou de "Input" para "Number"
+    Type = "Input",  -- mudou de "Input" para "Number"
     Placeholder = "Ex: 50, 100, 200...",
     Callback = function(input) 
         local speed = tonumber(input)
