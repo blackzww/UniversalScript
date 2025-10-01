@@ -433,44 +433,33 @@ Tab4:Slider({
         })
     end
 })
--- TAB 5 SPEED
-Tab5:Button({
-    Title = "Velocidade +",
-    Desc = "Aumenta velocidade",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
-            local currentSpeed = player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed
-            local newSpeed = math.min(currentSpeed + 10, 300)
-            player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = newSpeed
-            
-            WindUI:Notify({
-                Title = "Speed",
-                Content = "Velocidade: " .. newSpeed,
-                Duration = 2,
-                Icon = "gauge",
-            })
+
         end
     end
 })
-
-Tab5:Button({
-    Title = "Velocidade -",
-    Desc = "Diminui velocidade",
-    Callback = function()
+-- TAB 5: SPEED SLIDER
+local Slider = Tab5:Slider({
+    Title = "Velocidade",
+    Step = 1,
+    Value = {
+        Min = 16,
+        Max = 300,
+        Default = 16,
+    },
+    Callback = function(value)
+        -- muda a velocidade do humanoid
         local player = game.Players.LocalPlayer
         if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
-            local currentSpeed = player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed
-            local newSpeed = math.max(currentSpeed - 10, 16)
-            player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = newSpeed
-            
-            WindUI:Notify({
-                Title = "Speed",
-                Content = "Velocidade: " .. newSpeed,
-                Duration = 2,
-                Icon = "gauge",
-            })
+            player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
         end
+
+        -- notificação
+        WindUI:Notify({
+            Title = "Speed",
+            Content = "Velocidade: " .. value,
+            Duration = 2,
+            Icon = "gauge",
+        })
     end
 })
 
