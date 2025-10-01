@@ -460,7 +460,7 @@ Tab5:Input({
                     Title = "Speed",
                     Content = "Velocidade: " .. speed,
                     Duration = 2,
-                    Icon = "run", -- Mantido como "run" ou similar, pois a ação é velocidade
+                    Icon = "triangle-alert", -- Mantido como "run" ou similar, pois a ação é velocidade
                 })
             end
         else
