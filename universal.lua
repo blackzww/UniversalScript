@@ -439,56 +439,42 @@ Tab4:Slider({
     end
 })
 
--- TAB 5 SPEED
-local MinSpeed = 16
-local MaxSpeed = 1000
-
-local SpeedInput = Tab:Input({
+-- TAB 5: VELOCIDADE COM INPUT (Limitado de 16 a 1000)
+Tab5:Input({
     Title = "Definir Velocidade",
-    Desc = "Velocidade Mínima: " .. MinSpeed .. ". Máxima Recomendada: 300.",
-    Value = tostring(MinSpeed), -- Define o valor inicial como o mínimo
-    InputIcon = "text_cursor",
-    Type = "Input", -- Garante que o campo de texto aparece
+    -- Altera a descrição para o novo limite
+    Desc = "Digite um valor entre 16 e 1000. Recomendado usar menos de 300.", 
+    Value = "16",
+    InputIcon = "gauge",
+    Type = "Input", -- Mantemos o "Input", pois sabemos que funciona
     Placeholder = "Ex: 50, 100, 200...",
     Callback = function(input) 
         local speed = tonumber(input)
-
-        -- 1. Verifica se é um número válido e está dentro do limite
-        if speed and speed >= MinSpeed and speed <= MaxSpeed then
+        
+        -- 🛑 Altera o limite máximo para 1000
+        if speed and speed >= 16 and speed <= 1000 then 
             local player = game.Players.LocalPlayer
-            
-            -- 2. Tenta aplicar a velocidade
             if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
                 player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speed
-
-                -- 3. Notificação de sucesso
+                
                 WindUI:Notify({
-                    Title = "Sucesso",
-                    Content = "Velocidade alterada para: " .. speed,
+                    Title = "Speed",
+                    Content = "Velocidade: " .. speed,
                     Duration = 2,
-                    Icon = "text_cursor",
-                })
-            else
-                -- Notificação se não houver Humanoid (pode acontecer durante o carregamento)
-                WindUI:Notify({
-                    Title = "Erro",
-                    Content = "Não foi possível encontrar o Humanoid do jogador.",
-                    Duration = 2,
-                    Icon = "error",
+                    Icon = "gauge",
                 })
             end
         else
-            -- 4. Notificação de erro de validação
             WindUI:Notify({
-                Title = "Erro de Valor",
-                Content = "Digite um número entre " .. MinSpeed .. " e " .. MaxSpeed .. ".",
+                Title = "Erro",
+                -- Altera a mensagem de erro
+                Content = "Digite um número entre 16 e 1000",
                 Duration = 3,
                 Icon = "error",
             })
         end
     end
 })
-
 -- Notificação
 WindUI:Notify({
     Title = "Hub Carregado",
