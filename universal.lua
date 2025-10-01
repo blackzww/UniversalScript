@@ -442,35 +442,33 @@ Tab4:Slider({
 -- TAB 5: VELOCIDADE COM INPUT (Limitado de 16 a 1000)
 Tab5:Input({
     Title = "Definir Velocidade",
-    -- Altera a descrição para o novo limite
     Desc = "Digite um valor entre 16 e 1000. Recomendado usar menos de 300.", 
     Value = "16",
-    InputIcon = "text_cursor",
-    Type = "Input", -- Mantemos o "Input", pois sabemos que funciona
+    -- 🛑 Corrigido para "text-cursor" com hífen
+    InputIcon = "text-cursor", 
+    Type = "Input",
     Placeholder = "Ex: 50, 100, 200...",
     Callback = function(input) 
         local speed = tonumber(input)
-        
-        -- 🛑 Altera o limite máximo para 1000
+
         if speed and speed >= 16 and speed <= 1000 then 
             local player = game.Players.LocalPlayer
             if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
                 player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speed
-                
+
                 WindUI:Notify({
                     Title = "Speed",
                     Content = "Velocidade: " .. speed,
                     Duration = 2,
-                    Icon = "gauge",
+                    Icon = "run", -- Mantido como "run" ou similar, pois a ação é velocidade
                 })
             end
         else
             WindUI:Notify({
                 Title = "Erro",
-                -- Altera a mensagem de erro
                 Content = "Digite um número entre 16 e 1000",
                 Duration = 3,
-                Icon = "error",
+                Icon = "alert-triangle", 
             })
         end
     end
