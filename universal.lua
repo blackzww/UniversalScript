@@ -439,15 +439,13 @@ Tab4:Slider({
     end
 })
 
--- TAB 5: SPEED SLIDER
+-- TAB 5: SPEED SLIDER (corrigido para mesmo formato)
 Tab5:Slider({
     Title = "Velocidade",
-    Step = 1,
-    Value = {
-        Min = 16,
-        Max = 300,
-        Default = 16,
-    },
+    Desc = "Controla a velocidade do personagem",
+    Default = 16,
+    Min = 16,
+    Max = 300,
     Callback = function(value)
         local player = game.Players.LocalPlayer
         if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
