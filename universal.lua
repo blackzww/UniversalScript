@@ -425,6 +425,11 @@ Tab4:Slider({
     Min = 16,
     Max = 100,
     Callback = function(value)
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+            player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
+        end
+
         WindUI:Notify({
             Title = "Speed",
             Content = "Velocidade: " .. value,
@@ -434,11 +439,8 @@ Tab4:Slider({
     end
 })
 
-        end
-    end
-})
 -- TAB 5: SPEED SLIDER
-local Slider = Tab5:Slider({
+Tab5:Slider({
     Title = "Velocidade",
     Step = 1,
     Value = {
@@ -447,13 +449,11 @@ local Slider = Tab5:Slider({
         Default = 16,
     },
     Callback = function(value)
-        -- muda a velocidade do humanoid
         local player = game.Players.LocalPlayer
         if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
             player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
         end
 
-        -- notificação
         WindUI:Notify({
             Title = "Speed",
             Content = "Velocidade: " .. value,
