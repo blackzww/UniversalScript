@@ -442,7 +442,7 @@ Tab4:Slider({
 -- TAB 5: VELOCIDADE COM INPUT
 Tab5:Input({
     Title = "Definir Velocidade",
-    Desc = "Digite um valor entre 16 e 300",
+    Desc = "Recomendado usar menos de 300.",
     Value = "16",
     InputIcon = "gauge",
     Type = "Input",
@@ -450,7 +450,7 @@ Tab5:Input({
     Callback = function(input) 
         local speed = tonumber(input)
         
-        if speed and speed >= 16 and speed <= 300 then
+        if speed and speed >= 16 and speed <= 1000 then
             local player = game.Players.LocalPlayer
             if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
                 player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speed
@@ -459,13 +459,13 @@ Tab5:Input({
                     Title = "Speed",
                     Content = "Velocidade: " .. speed,
                     Duration = 2,
-                    Icon = "gauge",
+                    Icon = "text_cursor",
                 })
             end
         else
             WindUI:Notify({
                 Title = "Erro",
-                Content = "Digite um número entre 16 e 300",
+                Content = "Digite um número entre 16 e 1000",
                 Duration = 3,
                 Icon = "error",
             })
