@@ -439,22 +439,21 @@ Tab4:Slider({
     end
 })
 
--- TAB 5: VELOCIDADE COM INPUT
 Tab5:Input({
     Title = "Definir Velocidade",
     Desc = "Recomendado usar menos de 300.",
     Value = "16",
     InputIcon = "text_cursor",
-    Type = "Input",
+    Type = "Number",  -- mudou de "Input" para "Number"
     Placeholder = "Ex: 50, 100, 200...",
     Callback = function(input) 
         local speed = tonumber(input)
-        
+
         if speed and speed >= 16 and speed <= 1000 then
             local player = game.Players.LocalPlayer
             if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
                 player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = speed
-                
+
                 WindUI:Notify({
                     Title = "Speed",
                     Content = "Velocidade: " .. speed,
