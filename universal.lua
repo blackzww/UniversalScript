@@ -1,855 +1,740 @@
+--[[
+    Mirrors Hub | Interface Premium
+    Autor: blackzw
+    Versão: 2.0
+]]
+
 --==================================================
--- MIRRORS HUB v3.1 | CORE & BASE
--- Autor: blackzw
+-- CONFIGURAÇÕES INICIAIS
 --==================================================
 
---==============================
--- 🔒 PROTEÇÃO DUPLA EXECUÇÃO
---==============================
-if getgenv().MIRRORS_HUB_LOADED then
-    warn("[Mirrors Hub] Script já executado.")
-    return
-end
-getgenv().MIRRORS_HUB_LOADED = true
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
---==============================
--- 🔧 SERVIÇOS
---==============================
-local Services = {
-    Players = game:GetService("Players"),
-    RunService = game:GetService("RunService"),
-    Workspace = game:GetService("Workspace"),
-    ReplicatedStorage = game:GetService("ReplicatedStorage"),
-    StarterGui = game:GetService("StarterGui"),
-    MarketplaceService = game:GetService("MarketplaceService")
-}
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
 
-local LocalPlayer = Services.Players.LocalPlayer
-local Camera = Services.Workspace.CurrentCamera
+--==================================================
+-- FUNCAO PARA APARECER A NOTIFY
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
 
---==============================
--- 🧠 CONFIG GLOBAL
---==============================
-getgenv().MirrorsHub = {
-    Version = "3.1",
-    Author = "blackzw",
-    LoadedAt = os.time()
-}
+local player = Players.LocalPlayer
 
-local Config = {
-    Player = {
-        Speed = 16,
-        Jump = 50,
-        InfiniteJump = false
-    },
-    Aimbot = { Enabled = false },
-    ESP = {
-        Enabled = false,
-        BoxScale = 1,
-        Thickness = 2,
-        Color = Color3.fromRGB(0,255,0),
-        Tracer = false
-    },
-    Fling = {
-        Touch = false,
-        Manual = false,
-        Auto = false
-    }
-}
+-- Espera o PlayerGui carregar
+player:WaitForChild("PlayerGui")
 
---==============================
--- 🔔 NOTIFICAÇÃO INICIAL
---==============================
+-- Espera um pouco mais para garantir que tudo está carregado
+wait(1)
+
 pcall(function()
-    Services.StarterGui:SetCore("SendNotification", {
-        Title = "Mirrors Hub v3.1",
-        Text = "Carregando interface...",
-        Duration = 5,
-        Icon = "rbxassetid://77513496492572"
-    })
+	StarterGui:SetCore("SendNotification", {
+		Title = "Mirrors Hub",
+		Text = "Execute o script novamente para inicia-lo.",
+		Icon = "rbxassetid://77513496492572", -- Ícone que funciona
+		Duration = 8
+	})
 end)
 
---==============================
--- 🌐 LOAD WINDUI
---==============================
+--==================================================
+-- CARREGAR INTERFACE
+--==================================================
+
 local Interface = loadstring(game:HttpGet(
     "https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"
 ))()
 
---==============================
--- 🪟 JANELA PRINCIPAL
---==============================
-local Window = Interface:CreateWindow({
-    Title = "Mirrors Hub",
-    Icon = "app-window",
-    Author = "by blackzw",
-    Folder = "MirrorsHub"
-})
-
-local Tabs = {
-    Main = Window:Tab({ Title = "Principal", Icon = "home" }),
-    Player = Window:Tab({ Title = "Player", Icon = "user" }),
-    Scripts = Window:Tab({ Title = "Scripts", Icon = "layers" }),
-    Credits = Window:Tab({ Title = "Créditos", Icon = "info" })
-}
-
---==============================
--- 🎮 DETECTAR JOGO
---==============================
-task.spawn(function()
-    local success, info = pcall(function()
-        return Services.MarketplaceService:GetProductInfo(game.PlaceId)
-    end)
-
-    if success and info and info.Name then
-        print("[Mirrors Hub] Jogo detectado:", info.Name)
-    else
-        warn("[Mirrors Hub] Não foi possível detectar o jogo.")
-    end
-end)
-
---==============================
--- 🏘️ ALTERAR NICK (BROOKHAVEN)
---==============================
-pcall(function()
-    local RE = Services.ReplicatedStorage:FindFirstChild("RE")
-    if RE and RE:FindFirstChild("1RPNam1eTex1t") then
-        RE["1RPNam1eTex1t"]:FireServer(
-            "RolePlayName",
-            "🤓 | MirrorsHub by Blackzw"
-        )
-        print("[Mirrors Hub] Nick alterado (Brookhaven)")
-    end
-end)
-
---==============================
--- 📢 NOTIFICAÇÃO FINAL DA BASE
---==============================
-Interface:Notify({
-    Title = "Mirrors Hub",
-    Content = "Base carregada com sucesso",
-    Duration = 4,
-    Icon = "check"
-})
-
-print("[Mirrors Hub] CORE & BASE carregados com sucesso.")
 --==================================================
--- PARTE 2 | COMBATE
--- AIMBOT + AUTOKILL
+-- EXECUTAR AUTOKILL
 --==================================================
-
---==============================
--- 🎯 VARIÁVEIS AIMBOT
---==============================
-local AimbotConnection = nil
-
--- Atualizar character
-local Character = LocalPlayer.Character
-local HRP = Character and Character:FindFirstChild("HumanoidRootPart")
-
-LocalPlayer.CharacterAdded:Connect(function(char)
-    Character = char
-    HRP = char:WaitForChild("HumanoidRootPart")
-end)
-
---==============================
--- 🔍 OBTER ALVO MAIS PRÓXIMO
---==============================
-local function GetClosestPlayer()
-    if not HRP then return nil end
-
-    local closest, shortest = nil, math.huge
-
-    for _, plr in ipairs(Services.Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character then
-            local root = plr.Character:FindFirstChild("HumanoidRootPart")
-            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
-
-            if root and hum and hum.Health > 0 then
-                local dist = (root.Position - HRP.Position).Magnitude
-                if dist < shortest then
-                    shortest = dist
-                    closest = root
-                end
-            end
-        end
-    end
-
-    return closest
-end
-
---==============================
--- 🎯 TOGGLE AIMBOT
---==============================
-local function ToggleAimbot(state)
-    Config.Aimbot.Enabled = state
-
-    if state then
-        if AimbotConnection then return end
-
-        AimbotConnection = Services.RunService.RenderStepped:Connect(function()
-            if not Config.Aimbot.Enabled then return end
-            local target = GetClosestPlayer()
-            if target then
-                Camera.CFrame = CFrame.lookAt(
-                    Camera.CFrame.Position,
-                    target.Position
-                )
-            end
-        end)
-    else
-        if AimbotConnection then
-            AimbotConnection:Disconnect()
-            AimbotConnection = nil
-        end
-    end
-end
-
---==============================
--- ☠️ AUTOKILL (INTEGRAÇÃO)
---==============================
-local AutoKillLoaded = false
 
 pcall(function()
     loadstring(game:HttpGet(
         "https://raw.githubusercontent.com/blackzww/auto-kill/refs/heads/main/autokill.lua"
     ))()
-    AutoKillLoaded = true
-    print("[Mirrors Hub] AutoKill carregado")
 end)
 
-local function ToggleAutoKill(state)
-    if not AutoKillLoaded or not getgenv().AutoKill then
-        warn("[Mirrors Hub] AutoKill não disponível")
-        return
+--==================================================
+-- NOTIFICAÇÃO INICIAL
+--==================================================
+
+Interface:Notify({
+    Title = "Mirrors Hub",
+    Content = "Interface carregada com sucesso",
+    Duration = 3,
+    Icon = "check"
+})
+
+--==================================================
+-- CRIAÇÃO DA JANELA PRINCIPAL
+--==================================================
+
+local Janela = Interface:CreateWindow({
+    Title = "Mirrors Hub",
+    Icon = "app-window",
+    Author = "by blackzw",
+    Folder = "MirrorsHub",
+})
+
+--==================================================
+-- DECLARAÇÃO DE ABAS
+--==================================================
+
+local Principal = Janela:Tab({
+    Title = "Principal",
+    Icon = "home",
+})
+
+local Player = Janela:Tab({
+    Title = "Player",
+    Icon = "user",
+})
+
+local Scripts = Janela:Tab({
+    Title = "Scripts",
+    Icon = "layers",
+})
+
+local Creditos = Janela:Tab({
+    Title = "Créditos",
+    Icon = "info",
+})
+
+--==================================================
+-- VARIÁVEIS GLOBAIS
+--==================================================
+
+local Config = {
+    Velocidade = 16,
+    Pulo = 50,
+    AimbotAtivo = false,
+    ESPAtivo = false,
+    FlingAtivo = false,
+    AutoFlingAtivo = false
+}
+
+--==================================================
+-- Alterar Nick automaticamente (APENAS Brookhaven)
+--==================================================
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+if ReplicatedStorage:FindFirstChild("RE")
+and ReplicatedStorage.RE:FindFirstChild("1RPNam1eTex1t") then
+
+	local args = {
+		"RolePlayName",
+		"🤓 | MirrorsHub by Blackzw"
+	}
+
+	ReplicatedStorage.RE["1RPNam1eTex1t"]:FireServer(unpack(args))
+end
+--==================================================
+-- Detectar nome do jogo atual
+-- Mostra o nome no console ao iniciar o script
+--==================================================
+
+local MarketplaceService = game:GetService("MarketplaceService")
+
+local placeId = game.PlaceId
+local success, info = pcall(function()
+	return MarketplaceService:GetProductInfo(placeId)
+end)
+
+if success and info and info.Name then
+	print("[Mirrors Hub] Jogo detectado:", info.Name)
+else
+	warn("[Mirrors Hub] Não foi possível identificar o nome do jogo")
+end
+
+--==================================================
+-- SISTEMA DE AIMBOT
+--==================================================
+
+local ConexaoAimbot = nil
+local PersonagemLocal = LocalPlayer.Character
+local RAIZLocal = PersonagemLocal and PersonagemLocal:FindFirstChild("HumanoidRootPart")
+
+LocalPlayer.CharacterAdded:Connect(function(personagem)
+    PersonagemLocal = personagem
+    RAIZLocal = personagem:WaitForChild("HumanoidRootPart")
+end)
+
+local function ObterJogadorMaisProximo()
+    local meuPersonagem = LocalPlayer.Character
+    local minhaRAIZ = meuPersonagem and meuPersonagem:FindFirstChild("HumanoidRootPart")
+    if not minhaRAIZ then return nil end
+
+    local maisProximo, distancia = nil, math.huge
+
+    for _, jogador in ipairs(Players:GetPlayers()) do
+        if jogador ~= LocalPlayer and jogador.Character then
+            local raiz = jogador.Character:FindFirstChild("HumanoidRootPart")
+            local humanoide = jogador.Character:FindFirstChildOfClass("Humanoid")
+            
+            if raiz and humanoide and humanoide.Health > 0 then
+                local d = (raiz.Position - minhaRAIZ.Position).Magnitude
+                if d < distancia then
+                    distancia = d
+                    maisProximo = raiz
+                end
+            end
+        end
     end
 
-    if state then
-        if getgenv().AutoKill.Start then
-            getgenv().AutoKill.Start()
+    return maisProximo
+end
+
+local function IniciarAimbot()
+    if ConexaoAimbot then return end
+
+    Config.AimbotAtivo = true
+    ConexaoAimbot = RunService.RenderStepped:Connect(function()
+        if not Config.AimbotAtivo then return end
+
+        local alvo = ObterJogadorMaisProximo()
+        if alvo then
+            Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, alvo.Position)
         end
-    else
-        if getgenv().AutoKill.Stop then
-            getgenv().AutoKill.Stop()
-        end
+    end)
+end
+
+local function PararAimbot()
+    Config.AimbotAtivo = false
+    if ConexaoAimbot then
+        ConexaoAimbot:Disconnect()
+        ConexaoAimbot = nil
     end
 end
 
---==============================
--- 🧠 UI | ABA PRINCIPAL
---==============================
-Tabs.Main:Toggle({
-    Title = "Aimbot",
-    Desc = "Mira automaticamente no jogador mais próximo",
-    Value = false,
-    Callback = ToggleAimbot
-})
-
-Tabs.Main:Toggle({
-    Title = "Auto Kill",
-    Desc = "Sistema AutoKill integrado (Start / Stop)",
-    Value = false,
-    Callback = ToggleAutoKill
-})
-
-Tabs.Main:Paragraph({
-    Title = "Combate",
-    Desc = "Sistemas avançados de combate ativados\nUse com cuidado.",
-    Color = "Red"
-})
-
-print("[Mirrors Hub] PARTE 2 carregada.")
 --==================================================
--- PARTE 3 | ESP COMPLETO
+-- SISTEMA DE ESP
 --==================================================
 
-local ESPObjects = {}
+local ConfigESP = {
+    Ativo = false,
+    TamanhoCaixa = 1,
+    Espessura = 2,
+    Cor = Color3.fromRGB(0, 255, 0),
+    MostrarLinha = false
+}
 
---==============================
--- 🧱 CRIAR ESP
---==============================
-local function CreateESP(player)
-    if player == LocalPlayer then return end
+local ObjetosESP = {}
 
-    local box = Drawing.new("Square")
-    box.Filled = false
-    box.Visible = false
+local function RemoverESP(jogador)
+    if ObjetosESP[jogador] then
+        for _, objeto in pairs(ObjetosESP[jogador]) do
+            objeto:Remove()
+        end
+        ObjetosESP[jogador] = nil
+    end
+end
 
-    local name = Drawing.new("Text")
-    name.Size = 14
-    name.Center = true
-    name.Outline = true
-    name.Visible = false
+local function CriarESP(jogador)
+    if jogador == LocalPlayer then return end
 
-    local info = Drawing.new("Text")
-    info.Size = 13
-    info.Center = true
-    info.Outline = true
-    info.Visible = false
+    local caixa = Drawing.new("Square")
+    caixa.Filled = false
+    caixa.Visible = false
 
-    local tracer = Drawing.new("Line")
-    tracer.Visible = false
+    local nome = Drawing.new("Text")
+    nome.Size = 14
+    nome.Center = true
+    nome.Outline = true
+    nome.Visible = false
 
-    ESPObjects[player] = {
-        Box = box,
-        Name = name,
-        Info = info,
-        Tracer = tracer
+    local informacao = Drawing.new("Text")
+    informacao.Size = 13
+    informacao.Center = true
+    informacao.Outline = true
+    informacao.Visible = false
+
+    local linha = Drawing.new("Line")
+    linha.Visible = false
+
+    ObjetosESP[jogador] = {
+        Caixa = caixa,
+        Nome = nome,
+        Info = informacao,
+        Linha = linha
     }
 end
 
---==============================
--- ❌ REMOVER ESP
---==============================
-local function RemoveESP(player)
-    local esp = ESPObjects[player]
-    if esp then
-        for _, obj in pairs(esp) do
-            pcall(function() obj:Remove() end)
-        end
-        ESPObjects[player] = nil
-    end
+-- Inicializar ESP para jogadores existentes
+for _, jogador in ipairs(Players:GetPlayers()) do
+    CriarESP(jogador)
 end
 
---==============================
--- 👥 PLAYERS
---==============================
-for _, plr in ipairs(Services.Players:GetPlayers()) do
-    CreateESP(plr)
-end
+Players.PlayerAdded:Connect(CriarESP)
+Players.PlayerRemoving:Connect(RemoverESP)
 
-Services.Players.PlayerAdded:Connect(CreateESP)
-Services.Players.PlayerRemoving:Connect(RemoveESP)
-
---==============================
--- 🎥 ATUALIZAR ESP
---==============================
-Services.RunService.RenderStepped:Connect(function()
-    for plr, esp in pairs(ESPObjects) do
-        if not Config.ESP.Enabled then
-            for _, obj in pairs(esp) do
-                obj.Visible = false
+RunService.RenderStepped:Connect(function()
+    for jogador, esp in pairs(ObjetosESP) do
+        if not ConfigESP.Ativo then
+            for _, objeto in pairs(esp) do
+                objeto.Visible = false
             end
             continue
         end
 
-        local char = plr.Character
-        local root = char and char:FindFirstChild("HumanoidRootPart")
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        local personagem = jogador.Character
+        local raiz = personagem and personagem:FindFirstChild("HumanoidRootPart")
+        local humanoide = personagem and personagem:FindFirstChildOfClass("Humanoid")
 
-        if root and hum and hum.Health > 0 then
-            local pos, onScreen = Camera:WorldToViewportPoint(root.Position)
-            if onScreen then
-                local distance = (Camera.CFrame.Position - root.Position).Magnitude
-                local size = Vector2.new(40, 60) * Config.ESP.BoxScale
+        if raiz and humanoide and humanoide.Health > 0 then
+            local posicao, naTela = Camera:WorldToViewportPoint(raiz.Position)
 
-                -- BOX
-                esp.Box.Size = size
-                esp.Box.Position = Vector2.new(pos.X - size.X/2, pos.Y - size.Y/2)
-                esp.Box.Color = Config.ESP.Color
-                esp.Box.Thickness = Config.ESP.Thickness
-                esp.Box.Visible = true
+            if naTela then
+                local distancia = (Camera.CFrame.Position - raiz.Position).Magnitude
+                local tamanho = Vector2.new(40, 60) * ConfigESP.TamanhoCaixa
 
-                -- NAME
-                esp.Name.Text = plr.Name
-                esp.Name.Position = Vector2.new(pos.X, pos.Y - size.Y/2 - 16)
-                esp.Name.Color = Config.ESP.Color
-                esp.Name.Visible = true
+                -- Caixa
+                esp.Caixa.Size = tamanho
+                esp.Caixa.Position = Vector2.new(posicao.X - tamanho.X/2, posicao.Y - tamanho.Y/2)
+                esp.Caixa.Color = ConfigESP.Cor
+                esp.Caixa.Thickness = ConfigESP.Espessura
+                esp.Caixa.Visible = true
 
-                -- INFO
-                esp.Info.Text = math.floor(hum.Health).." HP | "..math.floor(distance).."m"
-                esp.Info.Position = Vector2.new(pos.X, pos.Y + size.Y/2 + 2)
-                esp.Info.Color = Config.ESP.Color
+                -- Nome
+                esp.Nome.Text = jogador.Name
+                esp.Nome.Position = Vector2.new(posicao.X, posicao.Y - tamanho.Y/2 - 16)
+                esp.Nome.Color = ConfigESP.Cor
+                esp.Nome.Visible = true
+
+                -- Informações
+                esp.Info.Text = math.floor(humanoide.Health).." HP | "..math.floor(distancia).."m"
+                esp.Info.Position = Vector2.new(posicao.X, posicao.Y + tamanho.Y/2 + 2)
+                esp.Info.Color = ConfigESP.Cor
                 esp.Info.Visible = true
 
-                -- TRACER
-                if Config.ESP.Tracer and HRP then
-                    local myPos, myScreen = Camera:WorldToViewportPoint(HRP.Position)
-                    if myScreen then
-                        esp.Tracer.From = Vector2.new(myPos.X, myPos.Y)
-                        esp.Tracer.To = Vector2.new(pos.X, pos.Y + size.Y/2)
-                        esp.Tracer.Color = Config.ESP.Color
-                        esp.Tracer.Thickness = Config.ESP.Thickness
-                        esp.Tracer.Visible = true
+                -- Linha de conexão
+                if ConfigESP.MostrarLinha and RAIZLocal then
+                    local minhaPosicao, minhaTela = Camera:WorldToViewportPoint(RAIZLocal.Position)
+
+                    if minhaTela then
+                        esp.Linha.From = Vector2.new(minhaPosicao.X, minhaPosicao.Y)
+                        esp.Linha.To = Vector2.new(posicao.X, posicao.Y + tamanho.Y/2)
+                        esp.Linha.Color = ConfigESP.Cor
+                        esp.Linha.Thickness = ConfigESP.Espessura
+                        esp.Linha.Visible = true
                     else
-                        esp.Tracer.Visible = false
+                        esp.Linha.Visible = false
                     end
                 else
-                    esp.Tracer.Visible = false
+                    esp.Linha.Visible = false
                 end
             else
-                for _, obj in pairs(esp) do
-                    obj.Visible = false
+                for _, objeto in pairs(esp) do
+                    objeto.Visible = false
                 end
             end
         else
-            for _, obj in pairs(esp) do
-                obj.Visible = false
+            for _, objeto in pairs(esp) do
+                objeto.Visible = false
             end
         end
     end
 end)
 
---==============================
--- 🧠 UI | ABA PLAYER (ESP)
---==============================
-Tabs.Player:Paragraph({
-    Title = "ESP Visual",
-    Desc = "ESP completo: Caixa, Nome, Vida, Distância e Linha",
-    Color = "Green"
-})
-
-Tabs.Player:Toggle({
-    Title = "Ativar ESP",
-    Value = false,
-    Callback = function(v)
-        Config.ESP.Enabled = v
-    end
-})
-
-Tabs.Player:Toggle({
-    Title = "Linha (Tracer)",
-    Value = false,
-    Callback = function(v)
-        Config.ESP.Tracer = v
-    end
-})
-
-Tabs.Player:Slider({
-    Title = "Tamanho da Caixa",
-    Step = 0.1,
-    Value = { Min = 0.6, Max = 3, Default = 1 },
-    Callback = function(v)
-        Config.ESP.BoxScale = v
-    end
-})
-
-Tabs.Player:Slider({
-    Title = "Espessura",
-    Step = 1,
-    Value = { Min = 1, Max = 6, Default = 2 },
-    Callback = function(v)
-        Config.ESP.Thickness = v
-    end
-})
-
-Tabs.Player:Colorpicker({
-    Title = "Cor do ESP",
-    Default = Color3.fromRGB(0,255,0),
-    Callback = function(c)
-        Config.ESP.Color = c
-    end
-})
-
-print("[Mirrors Hub] PARTE 3 (ESP) carregada.")
 --==================================================
--- PARTE 4 | PLAYER
+-- SISTEMA DE FLING
 --==================================================
 
---==============================
--- 🧍‍♂️ ATUALIZAR HUMANOID
---==============================
-local function ApplyHumanoidSettings(char)
-    local hum = char:WaitForChild("Humanoid", 5)
-    if not hum then return end
+local FlingAtivo = false
+local ThreadFling = nil
+local AutoFlingAtivo = false
+local ThreadAutoFling = nil
 
-    hum.WalkSpeed = Config.Player.Speed
-    hum.JumpPower = Config.Player.Jump
+-- Prevenção de duplicação
+if not ReplicatedStorage:FindFirstChild("identificador_fling") then
+    local identificador = Instance.new("Decal")
+    identificador.Name = "identificador_fling"
+    identificador.Parent = ReplicatedStorage
 end
 
-if LocalPlayer.Character then
-    ApplyHumanoidSettings(LocalPlayer.Character)
-end
+local function IniciarFling()
+    if ThreadFling then return end
 
-LocalPlayer.CharacterAdded:Connect(ApplyHumanoidSettings)
+    FlingAtivo = true
+    ThreadFling = task.spawn(function()
+        local movimento = 0.1
 
---==============================
--- 🕴️ INFINITE JUMP
---==============================
-Services.UserInputService = game:GetService("UserInputService")
+        while FlingAtivo do
+            RunService.Heartbeat:Wait()
 
-Services.UserInputService.JumpRequest:Connect(function()
-    if Config.Player.InfiniteJump then
-        local char = LocalPlayer.Character
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
-    end
-end)
+            local personagem = LocalPlayer.Character
+            local raiz = personagem and personagem:FindFirstChild("HumanoidRootPart")
 
---==============================
--- 💥 FLING CORE
---==============================
-local FlingThread
-local AutoFlingThread
+            if raiz then
+                local velocidade = raiz.Velocity
+                raiz.Velocity = velocidade * 10000 + Vector3.new(0, 10000, 0)
 
--- Prevenção duplicada
-if not Services.ReplicatedStorage:FindFirstChild("mirrors_fling_flag") then
-    local flag = Instance.new("BoolValue")
-    flag.Name = "mirrors_fling_flag"
-    flag.Parent = Services.ReplicatedStorage
-end
+                RunService.RenderStepped:Wait()
+                if raiz then
+                    raiz.Velocity = velocidade
+                end
 
---==============================
--- 🔄 FLING LOOP
---==============================
-local function StartFling()
-    if FlingThread then return end
-    Config.Fling.Manual = true
-
-    FlingThread = task.spawn(function()
-        while Config.Fling.Manual do
-            Services.RunService.Heartbeat:Wait()
-
-            local char = LocalPlayer.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                local vel = hrp.Velocity
-                hrp.Velocity = vel * 9999 + Vector3.new(0, 9999, 0)
-                task.wait()
-                if hrp then
-                    hrp.Velocity = vel
+                RunService.Stepped:Wait()
+                if raiz then
+                    raiz.Velocity = velocidade + Vector3.new(0, movimento, 0)
+                    movimento = -movimento
                 end
             end
         end
-        FlingThread = nil
+
+        ThreadFling = nil
     end)
 end
 
-local function StopFling()
-    Config.Fling.Manual = false
+local function PararFling()
+    FlingAtivo = false
 end
 
---==============================
--- 🤝 TOUCH FLING
---==============================
-local TouchConnections = {}
-
-local function EnableTouchFling()
-    Config.Fling.Touch = true
-
-    for _, plr in ipairs(Services.Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            local char = plr.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if hrp and not TouchConnections[plr] then
-                TouchConnections[plr] = hrp.Touched:Connect(function(hit)
-                    if Config.Fling.Touch then
-                        StartFling()
-                        task.delay(0.15, StopFling)
-                    end
-                end)
-            end
+-- Sistema de Auto Fling
+local function ObterAlvos()
+    local alvos = {}
+    for _, jogador in ipairs(Players:GetPlayers()) do
+        if jogador ~= LocalPlayer and jogador.Character and jogador.Character:FindFirstChild("HumanoidRootPart") then
+            table.insert(alvos, jogador)
         end
     end
+    return alvos
 end
 
-local function DisableTouchFling()
-    Config.Fling.Touch = false
-    for _, con in pairs(TouchConnections) do
-        con:Disconnect()
-    end
-    TouchConnections = {}
-end
+local function AcolarAlvo(alvo)
+    local minhaRAIZ = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local raizAlvo = alvo.Character and alvo.Character:FindFirstChild("HumanoidRootPart")
+    
+    if not (minhaRAIZ and raizAlvo) then return false end
 
---==============================
--- 🤖 AUTO FLING
---==============================
-local function GetTargets()
-    local t = {}
-    for _, plr in ipairs(Services.Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            table.insert(t, plr)
-        end
-    end
-    return t
-end
-
-local function AttachToTarget(plr)
-    local myHRP = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    local targetHRP = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-    if not (myHRP and targetHRP) then return false end
-
-    myHRP.CFrame = targetHRP.CFrame
-    myHRP.Velocity = Vector3.zero
-    myHRP.RotVelocity = Vector3.zero
+    minhaRAIZ.CFrame = raizAlvo.CFrame
+    minhaRAIZ.Velocity = Vector3.zero
+    minhaRAIZ.RotVelocity = Vector3.zero
+    
     return true
 end
 
-local function StartAutoFling()
-    if AutoFlingThread then return end
-    Config.Fling.Auto = true
-    StartFling()
+local function EsperarFling(alvo)
+    local raizAlvo = alvo.Character and alvo.Character:FindFirstChild("HumanoidRootPart")
+    if not raizAlvo then return true end
 
-    AutoFlingThread = task.spawn(function()
-        while Config.Fling.Auto do
-            for _, target in ipairs(GetTargets()) do
-                if not Config.Fling.Auto then break end
-                if AttachToTarget(target) then
-                    task.wait(0.15)
+    local posicaoInicial = raizAlvo.Position
+    local distanciaFling = 30
+
+    while AutoFlingAtivo do
+        task.wait(0.05)
+
+        if not raizAlvo or not raizAlvo.Parent then
+            return true
+        end
+
+        local distancia = (raizAlvo.Position - posicaoInicial).Magnitude
+
+        if distancia >= distanciaFling or raizAlvo.Velocity.Magnitude > 10000 then
+            return true
+        end
+
+        AcolarAlvo(alvo)
+    end
+
+    return true
+end
+
+local function IniciarAutoFling()
+    if ThreadAutoFling then return end
+
+    AutoFlingAtivo = true
+    FlingAtivo = true
+    IniciarFling()
+
+    ThreadAutoFling = task.spawn(function()
+        while AutoFlingAtivo do
+            for _, alvo in ipairs(ObterAlvos()) do
+                if not AutoFlingAtivo then break end
+
+                if AcolarAlvo(alvo) then
+                    EsperarFling(alvo)
                 end
+
+                task.wait(0.1)
             end
+
             task.wait(0.2)
         end
-        AutoFlingThread = nil
+
+        ThreadAutoFling = nil
     end)
 end
 
-local function StopAutoFling()
-    Config.Fling.Auto = false
-    StopFling()
+local function PararAutoFling()
+    AutoFlingAtivo = false
+    FlingAtivo = false
 end
 
---==============================
--- 🧠 UI | ABA PLAYER
---==============================
-Tabs.Player:Toggle({
+--==================================================
+-- ABA PRINCIPAL
+--==================================================
+
+Principal:Paragraph({
+    Title = "Mirrors Hub",
+    Desc = "Hub premium com funcionalidades avançadas.\nSistema integrado de AutoKill com controle seguro.",
+    Color = "Blue",
+})
+
+Principal:Toggle({
+    Title = "Aimbot",
+    Desc = "Mira automaticamente no jogador mais próximo",
+    Value = false,
+    Callback = function(estado)
+        if estado then
+            IniciarAimbot()
+        else
+            PararAimbot()
+        end
+    end
+})
+
+Principal:Toggle({
+    Title = "Auto Kill",
+    Desc = "Ativa ou desativa o sistema AutoKill",
+    Value = false,
+    Callback = function(estado)
+        if getgenv().AutoKill then
+            if estado then
+                getgenv().AutoKill.Start()
+            else
+                getgenv().AutoKill.Stop()
+            end
+        else
+            warn("Sistema AutoKill não carregado")
+        end
+    end
+})
+
+Principal:Button({
+    Title = "Executar Ação",
+    Desc = "Botão de teste para funcionalidades",
+    Callback = function()
+        print("Ação executada com sucesso")
+    end
+})
+
+--==================================================
+-- ABA PLAYER
+--==================================================
+
+Player:Slider({
+    Title = "Velocidade",
+    Desc = "Controla a velocidade de movimento do jogador",
+    Step = 1,
+    Value = {
+        Min = 16,
+        Max = 120,
+        Default = 16,
+    },
+    Callback = function(valor)
+        Config.Velocidade = valor
+        local personagem = LocalPlayer.Character
+        if personagem and personagem:FindFirstChildOfClass("Humanoid") then
+            personagem:FindFirstChildOfClass("Humanoid").WalkSpeed = valor
+        end
+    end
+})
+
+Player:Slider({
+    Title = "Força do Pulo",
+    Desc = "Ajusta a altura máxima do pulo",
+    Step = 5,
+    Value = {
+        Min = 50,
+        Max = 200,
+        Default = 50,
+    },
+    Callback = function(valor)
+        Config.Pulo = valor
+        local personagem = LocalPlayer.Character
+        if personagem and personagem:FindFirstChildOfClass("Humanoid") then
+            personagem:FindFirstChildOfClass("Humanoid").JumpPower = valor
+        end
+    end
+})
+
+Player:Toggle({
     Title = "Pulo Infinito",
+    Desc = "Permite pulos consecutivos no ar",
     Value = false,
-    Callback = function(v)
-        Config.Player.InfiniteJump = v
+    Callback = function(estado)
+        print("Pulo Infinito:", estado)
     end
 })
 
-Tabs.Player:Toggle({
+Player:Toggle({
     Title = "Touch Fling",
+    Desc = "Empurra jogadores ao encostar neles",
     Value = false,
-    Callback = function(v)
-        if v then
-            EnableTouchFling()
+    Callback = function(estado)
+        if estado then
+            IniciarFling()
         else
-            DisableTouchFling()
+            PararFling()
         end
     end
 })
 
-Tabs.Player:Toggle({
-    Title = "Fling Manual",
+Player:Toggle({
+    Title = "Fling Automático",
+    Desc = "Aplica fling em todos os jogadores do servidor",
     Value = false,
-    Callback = function(v)
-        if v then
-            StartFling()
+    Callback = function(estado)
+        if estado then
+            IniciarAutoFling()
         else
-            StopFling()
+            PararAutoFling()
         end
     end
 })
 
-Tabs.Player:Toggle({
-    Title = "Auto Fling",
+-- Configurações do ESP
+Player:Paragraph({
+    Title = "ESP Visual",
+    Desc = "Sistema avançado de ESP\nInclui caixa, nome, vida, distância e linha guia",
+    Color = "Green"
+})
+
+Player:Toggle({
+    Title = "Ativar ESP",
+    Desc = "Habilita o sistema de ESP",
     Value = false,
-    Callback = function(v)
-        if v then
-            StartAutoFling()
-        else
-            StopAutoFling()
-        end
+    Callback = function(estado)
+        ConfigESP.Ativo = estado
     end
 })
 
-print("[Mirrors Hub] PARTE 4 (PLAYER) carregada.")
+Player:Toggle({
+    Title = "Linha Guia",
+    Desc = "Exibe linha conectando ao jogador",
+    Value = false,
+    Callback = function(estado)
+        ConfigESP.MostrarLinha = estado
+    end
+})
+
+Player:Slider({
+    Title = "Tamanho da Caixa",
+    Desc = "Escala visual do ESP",
+    Step = 0.1,
+    Value = {
+        Min = 0.6,
+        Max = 3,
+        Default = 1,
+    },
+    Callback = function(valor)
+        ConfigESP.TamanhoCaixa = valor
+    end
+})
+
+Player:Slider({
+    Title = "Espessura",
+    Desc = "Define a espessura das linhas",
+    Step = 1,
+    Value = {
+        Min = 1,
+        Max = 6,
+        Default = 2,
+    },
+    Callback = function(valor)
+        ConfigESP.Espessura = valor
+    end
+})
+
+Player:Colorpicker({
+    Title = "Cor do ESP",
+    Desc = "Define a cor dos elementos visuais",
+    Default = Color3.fromRGB(0, 255, 0),
+    Transparency = 0,
+    Locked = false,
+    Callback = function(cor)
+        ConfigESP.Cor = cor
+    end
+})
+
 --==================================================
--- PARTE 5 | MOVIMENTO & PLAYER
+-- ABA SCRIPTS
 --==================================================
 
---==============================
--- 🔧 VARIÁVEIS
---==============================
-local Move = {
-    Superman = false,
-    Fly = false,
-    Noclip = false,
-    AntiHit = false
-}
-
-local Humanoid, HRP
-local FlyBV, FlyBG
-local FlyConn, NoclipConn, AntiHitConn
-
-local DEFAULT_WALK = 16
-local DEFAULT_JUMP = 50
-
-local SUPER_WALK = 80
-local SUPER_JUMP = 120
-
-local UIS = Services.UserInputService
-
--- Atualiza refs
-local function UpdateChar(char)
-    Humanoid = char:WaitForChild("Humanoid")
-    HRP = char:WaitForChild("HumanoidRootPart")
-
-    -- reset padrões
-    Humanoid.WalkSpeed = DEFAULT_WALK
-    Humanoid.JumpPower = DEFAULT_JUMP
-end
-
-if LocalPlayer.Character then
-    UpdateChar(LocalPlayer.Character)
-end
-
-LocalPlayer.CharacterAdded:Connect(UpdateChar)
-
---==============================
--- 🦸‍♂️ SUPERMAN
---==============================
-local function ToggleSuperman(state)
-    Move.Superman = state
-    if not Humanoid then return end
-
-    if state then
-        Humanoid.WalkSpeed = SUPER_WALK
-        Humanoid.JumpPower = SUPER_JUMP
-    else
-        Humanoid.WalkSpeed = DEFAULT_WALK
-        Humanoid.JumpPower = DEFAULT_JUMP
-    end
-end
-
---==============================
--- ✈️ FLY (MOBILE FRIENDLY)
---==============================
-local function StartFly()
-    if not HRP or FlyBV then return end
-
-    FlyBV = Instance.new("BodyVelocity")
-    FlyBV.Velocity = Vector3.zero
-    FlyBV.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-    FlyBV.Parent = HRP
-
-    FlyBG = Instance.new("BodyGyro")
-    FlyBG.CFrame = HRP.CFrame
-    FlyBG.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
-    FlyBG.P = 9e4
-    FlyBG.Parent = HRP
-
-    FlyConn = Services.RunService.RenderStepped:Connect(function()
-        if not Move.Fly or not HRP then return end
-        FlyBG.CFrame = Camera.CFrame
-
-        if UIS:IsKeyDown(Enum.KeyCode.W) then
-    dir = dir + Camera.CFrame.LookVector
-end
-
-if UIS:IsKeyDown(Enum.KeyCode.S) then
-    dir = dir - Camera.CFrame.LookVector
-end
-
-if UIS:IsKeyDown(Enum.KeyCode.A) then
-    dir = dir - Camera.CFrame.RightVector
-end
-
-if UIS:IsKeyDown(Enum.KeyCode.D) then
-    dir = dir + Camera.CFrame.RightVector
-end
-
-if UIS:IsKeyDown(Enum.KeyCode.Space) then
-    dir = dir + Vector3.new(0,1,0)
-end
-
-if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
-    dir = dir - Vector3.new(0,1,0)
-end
-        FlyBV.Velocity = dir * 70
-    end)
-end
-
-local function StopFly()
-    if FlyConn then FlyConn:Disconnect() FlyConn = nil end
-    if FlyBV then FlyBV:Destroy() FlyBV = nil end
-    if FlyBG then FlyBG:Destroy() FlyBG = nil end
-end
-
-local function ToggleFly(state)
-    Move.Fly = state
-    if state then StartFly() else StopFly() end
-end
-
---==============================
--- 👻 NOCLIP REAL
---==============================
-local function ToggleNoclip(state)
-    Move.Noclip = state
-
-    if state then
-        if NoclipConn then return end
-        NoclipConn = Services.RunService.Stepped:Connect(function()
-            if not Move.Noclip or not LocalPlayer.Character then return end
-            for _,v in ipairs(LocalPlayer.Character:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CanCollide = false
-                end
-            end
-        end)
-    else
-        if NoclipConn then
-            NoclipConn:Disconnect()
-            NoclipConn = nil
-        end
-    end
-end
-
---==============================
--- 🛡️ ANTI-HIT (FANTASMA REAL)
---==============================
-local function ToggleAntiHit(state)
-    Move.AntiHit = state
-
-    if state then
-        if AntiHitConn then return end
-        AntiHitConn = Services.RunService.Stepped:Connect(function()
-            if not LocalPlayer.Character then return end
-            for _,v in ipairs(LocalPlayer.Character:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.CanCollide = false
-                    v.Massless = true
-                end
-            end
-        end)
-    else
-        if AntiHitConn then
-            AntiHitConn:Disconnect()
-            AntiHitConn = nil
-        end
-    end
-end
-
---==============================
--- 🧠 UI | ABA PLAYER
---==============================
-Tabs.Player:Toggle({
-    Title = "Modo Superman",
-    Desc = "Velocidade e pulo extremos",
-    Value = false,
-    Callback = ToggleSuperman
+Scripts:Paragraph({
+    Title = "Aviso Importante",
+    Desc = "Alguns scripts exigem chave de acesso.\nCertifique-se de obter a chave antes de utilizar.",
+    Color = "Green",
 })
 
-Tabs.Player:Toggle({
-    Title = "Fly",
-    Desc = "Voar livremente (mobile compatível)",
-    Value = false,
-    Callback = ToggleFly
+Scripts:Button({
+    Title = "OMG Hub",
+    Desc = "Executa o OMG Hub universal",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-OMG-Hub-43353"))()
+    end
 })
 
-Tabs.Player:Toggle({
+Scripts:Button({
+    Title = "Zee Hub",
+    Desc = "Carrega o Zee Hub",
+    Callback = function()
+        loadstring(game:HttpGet('https://zuwz.me/Ls-Zee-Hub-KL'))()
+    end
+})
+
+Scripts:Button({
+    Title = "Arch Hub",
+    Desc = "Inicializa o Arch Hub",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ChopLoris/ArcHub/main/main.lua"))()
+    end
+})
+
+Scripts:Button({
+    Title = "Infinite Yield",
+    Desc = "Ativa o Infinite Yield FE",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Infinite-Yield-FE-Script-74834"))()
+    end
+})
+
+Scripts:Button({
+    Title = "Fly V4",
+    Desc = "Habilita sistema de voo V4",
+    Callback = function()
+        getgenv().rotationSpeed = 1
+        getgenv().noclipfly = true
+        getgenv().useV3Method = false
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/linhmcfake/Script/refs/heads/main/FLYGUIV4"))()
+    end
+})
+
+Scripts:Button({
     Title = "Noclip",
-    Desc = "Atravessar paredes",
-    Value = false,
-    Callback = ToggleNoclip
+    Desc = "Ativa modo noclip",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/AkU0ZYKX"))()
+    end
 })
 
-Tabs.Player:Toggle({
-    Title = "Anti-Hit",
-    Desc = "Modo fantasma (ninguém encosta)",
-    Value = false,
-    Callback = ToggleAntiHit
+Scripts:Button({
+    Title = "ESP Externo",
+    Desc = "Carrega sistema ESP alternativo",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua'))()
+    end
 })
 
-Tabs.Player:Paragraph({
-    Title = "Movimento",
-    Desc = "Funções avançadas de player\nUse com cuidado.",
-    Color = "Blue"
-})
+--==================================================
+-- ABA CRÉDITOS
+--==================================================
 
-print("[Mirrors Hub] PARTE 5 carregada com sucesso.")
+Creditos:Paragraph({
+    Title = "Créditos",
+    Desc = "Desenvolvido por blackzw\nInterface: WindUI\nSistema integrado de AutoKill",
+    Color = "Green",
+})
