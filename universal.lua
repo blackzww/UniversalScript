@@ -102,7 +102,7 @@ local Creditos = Janela:Tab({
     Icon = "info",
 })
 
-local Config = Janela:Tab({
+local PlayerConfig = Janela:Tab({
     Title = "Configurações",
     Icon = "settings",
 })
@@ -541,7 +541,7 @@ Player:Slider({
         Default = 16,
     },
     Callback = function(valor)
-        Config.Velocidade = valor
+        PlayerConfig.Velocidade = valor
         local personagem = LocalPlayer.Character
         if personagem and personagem:FindFirstChildOfClass("Humanoid") then
             personagem:FindFirstChildOfClass("Humanoid").WalkSpeed = valor
@@ -559,7 +559,7 @@ Player:Slider({
         Default = 50,
     },
     Callback = function(valor)
-        Config.Pulo = valor
+        PlayerConfig.Pulo = valor
         local personagem = LocalPlayer.Character
         if personagem and personagem:FindFirstChildOfClass("Humanoid") then
             personagem:FindFirstChildOfClass("Humanoid").JumpPower = valor
@@ -906,29 +906,40 @@ end
 
 Players.PlayerAdded:Connect(HookPlayer)
 
---==================================================
--- TOGGLE (INTEGRAÇÃO COM SEU HUB)
---==================================================
-
-local Toggle = Config:Toggle({
-	Title = "Ativar Player Name",
-	Desc = "Ativa o nome do Owner",
-	Icon = "pencil",
-	Type = "Checkbox",
-	Value = false,
-	Callback = function(state)
-		TagEnabled = state
-
-		if state then
-			for _, plr in ipairs(Players:GetPlayers()) do
-				if plr.UserId == OWNER_ID and plr.Character then
-					CreateOwnerTag(plr.Character)
-				end
-			end
-		else
-			ClearTags()
+-- FORÇA A TAG A APARECER SE JÁ ESTIVER NO JOGO
+if TagEnabled then
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr.UserId == OWNER_ID and plr.Character then
+			CreateOwnerTag(plr.Character)
 		end
 	end
+end
+
+--==================================================
+-- TOGGLE PLAYER NAME (DEFAULT ON)
+--==================================================
+
+TagEnabled = true -- COMEÇA ATIVADO 🔥
+
+local Toggle = Config:Toggle({
+    Title = "Ativar Player Name",
+    Desc = "Ativa o nome do Owner",
+    Icon = "pencil",
+    Type = "Checkbox",
+    Value = true, -- JÁ COMEÇA LIGADO
+    Callback = function(state)
+        TagEnabled = state
+
+        if state then
+            for _, plr in ipairs(Players:GetPlayers()) do
+                if plr.UserId == OWNER_ID and plr.Character then
+                    CreateOwnerTag(plr.Character)
+                end
+            end
+        else
+            ClearTags()
+        end
+    end
 })
 
 --==================================================
