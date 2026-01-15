@@ -84,7 +84,7 @@ local Janela = Interface:CreateWindow({
 
 local Principal = Janela:Tab({
     Title = "Principal",
-    Icon = "home",
+    Icon = "house",
 })
 
 local Player = Janela:Tab({
@@ -101,6 +101,12 @@ local Creditos = Janela:Tab({
     Title = "Créditos",
     Icon = "info",
 })
+
+local Config = Janela:Tab({
+    Title = "Configurações",
+    Icon = "settings",
+})
+
 
 --==================================================
 -- VARIÁVEIS GLOBAIS
@@ -727,6 +733,202 @@ Scripts:Button({
     Callback = function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua'))()
     end
+})
+
+--==================================================
+-- ABA CONFIGURAÇÕES
+--==================================================
+--==================================================
+-- MIRRORS HUB | OWNER DAWN RGB TAG (FINAL)
+-- Autor: blackzw
+--==================================================
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+--// CONFIG
+local OWNER_ID = 4227153912
+
+local TITLE_TEXT = "Mirrors Hub | Owner 🤓"
+local SUB_TEXT   = "eoblackzwkj"
+
+--// CONTROLE
+local TagEnabled = false
+local ActiveConnections = {}
+
+--// RGB SUAVE (NÃO CARNAVAL)
+local function RGB(t, offset)
+	return Color3.fromHSV((t * 0.12 + offset) % 1, 0.75, 1)
+end
+
+--// LIMPAR TUDO
+local function ClearTags()
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr.Character and plr.Character:FindFirstChild("Head") then
+			local tag = plr.Character.Head:FindFirstChild("MirrorsOwnerTag")
+			if tag then tag:Destroy() end
+		end
+	end
+
+	for _, c in ipairs(ActiveConnections) do
+		pcall(function() c:Disconnect() end)
+	end
+	table.clear(ActiveConnections)
+end
+
+--// CRIAR TAG
+local function CreateOwnerTag(character)
+	if not TagEnabled then return end
+	if not character then return end
+
+	local player = Players:GetPlayerFromCharacter(character)
+	if not player or player.UserId ~= OWNER_ID then return end
+
+	local head = character:FindFirstChild("Head")
+	if not head then return end
+
+	if head:FindFirstChild("MirrorsOwnerTag") then
+		head.MirrorsOwnerTag:Destroy()
+	end
+
+	-- Billboard
+	local gui = Instance.new("BillboardGui")
+	gui.Name = "MirrorsOwnerTag"
+	gui.Adornee = head
+	gui.Size = UDim2.fromOffset(240, 52)
+	gui.StudsOffset = Vector3.new(0, 3, 0)
+	gui.AlwaysOnTop = true
+	gui.LightInfluence = 0
+	gui.Parent = head
+
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.fromScale(1,1)
+	frame.BackgroundTransparency = 1
+	frame.Parent = gui
+
+	-- TITLE SHADOW
+	local titleShadow = Instance.new("TextLabel")
+	titleShadow.Size = UDim2.fromScale(1,0.6)
+	titleShadow.Position = UDim2.fromOffset(1,1)
+	titleShadow.BackgroundTransparency = 1
+	titleShadow.Text = TITLE_TEXT
+	titleShadow.Font = Enum.Font.GothamBlack
+	titleShadow.TextScaled = true
+	titleShadow.TextColor3 = Color3.fromRGB(15,15,25)
+	titleShadow.TextTransparency = 0.45
+	titleShadow.Parent = frame
+
+	-- TITLE
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.fromScale(1,0.6)
+	title.BackgroundTransparency = 1
+	title.Text = TITLE_TEXT
+	title.Font = Enum.Font.GothamBlack
+	title.TextScaled = true
+	title.Parent = frame
+
+	local titleStroke = Instance.new("UIStroke")
+	titleStroke.Thickness = 2.5
+	titleStroke.Color = Color3.fromRGB(30,30,60)
+	titleStroke.Parent = title
+
+	-- SUB SHADOW
+	local subShadow = Instance.new("TextLabel")
+	subShadow.Size = UDim2.fromScale(1,0.4)
+	subShadow.Position = UDim2.fromScale(0,0.62)
+	subShadow.BackgroundTransparency = 1
+	subShadow.Text = SUB_TEXT
+	subShadow.Font = Enum.Font.GothamBlack
+	subShadow.TextScaled = true
+	subShadow.TextColor3 = Color3.fromRGB(15,15,25)
+	subShadow.TextTransparency = 0.5
+	subShadow.Parent = frame
+
+	-- SUB
+	local sub = Instance.new("TextLabel")
+	sub.Size = UDim2.fromScale(1,0.4)
+	sub.Position = UDim2.fromScale(0,0.6)
+	sub.BackgroundTransparency = 1
+	sub.Text = SUB_TEXT
+	sub.Font = Enum.Font.GothamBlack
+	sub.TextScaled = true
+	sub.Parent = frame
+
+	local subStroke = Instance.new("UIStroke")
+	subStroke.Thickness = 1.9
+	subStroke.Color = Color3.fromRGB(40,40,70)
+	subStroke.Parent = sub
+
+	-- LOOP
+	local t = 0
+	local conn
+	conn = RunService.RenderStepped:Connect(function(dt)
+		if not TagEnabled or not gui.Parent then
+			if gui then gui:Destroy() end
+			conn:Disconnect()
+			return
+		end
+
+		t += dt
+
+		-- RGB
+		title.TextColor3 = RGB(t, 0)
+		sub.TextColor3   = RGB(t, 0.35)
+
+		-- SCALE POR DISTÂNCIA (FIXADO)
+		local dist = (Camera.CFrame.Position - head.Position).Magnitude
+		local scale = math.clamp(1 - dist / 80, 0.6, 1)
+
+		gui.Size = UDim2.fromOffset(240 * scale, 52 * scale)
+	end)
+
+	table.insert(ActiveConnections, conn)
+end
+
+--// APLICAR QUANDO SPAWNAR
+local function HookPlayer(player)
+	if player.UserId ~= OWNER_ID then return end
+
+	player.CharacterAdded:Connect(function(char)
+		task.wait(0.2)
+		CreateOwnerTag(char)
+	end)
+
+	if player.Character then
+		CreateOwnerTag(player.Character)
+	end
+end
+
+for _, p in ipairs(Players:GetPlayers()) do
+	HookPlayer(p)
+end
+
+Players.PlayerAdded:Connect(HookPlayer)
+
+--==================================================
+-- TOGGLE (INTEGRAÇÃO COM SEU HUB)
+--==================================================
+
+local Toggle = Config:Toggle({
+	Title = "Ativar Player Name",
+	Desc = "Ativa o nome do Owner",
+	Icon = "pencil",
+	Type = "Checkbox",
+	Value = false,
+	Callback = function(state)
+		TagEnabled = state
+
+		if state then
+			for _, plr in ipairs(Players:GetPlayers()) do
+				if plr.UserId == OWNER_ID and plr.Character then
+					CreateOwnerTag(plr.Character)
+				end
+			end
+		else
+			ClearTags()
+		end
+	end
 })
 
 --==================================================
