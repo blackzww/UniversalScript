@@ -70,6 +70,39 @@ Interface:Notify({
 --==================================================
 -- CRIAÇÃO DA JANELA PRINCIPAL
 --==================================================
+WindUI.Services.mysuperservicetogetkey = {
+    Name = "Mirrors Key System",
+    Icon = "key", -- pode trocar (lucide, rbxassetid, link de imagem)
+
+    Args = { "ServiceId", "SuperId" }, -- pode deixar assim mesmo
+
+    New = function(ServiceId, SuperId)
+
+        local KEY_CORRETA = "mirrorsontop67"
+
+        local function validateKey(key)
+            if not key or key == "" then
+                return false, "Digite uma key válida!"
+            end
+
+            if key == KEY_CORRETA then
+                return true, "Key correta! Bem-vindo."
+            else
+                return false, "Key incorreta!"
+            end
+        end
+
+        local function copyLink()
+            setclipboard("https://direct-link.net/1715626/y971JMrUDb5l")
+            return true
+        end
+
+        return {
+            Verify = validateKey, -- NÃO mudar
+            Copy = copyLink       -- NÃO mudar
+        }
+    end
+}
 
 local Janela = Interface:CreateWindow({
     Title = "Mirrors Hub",
